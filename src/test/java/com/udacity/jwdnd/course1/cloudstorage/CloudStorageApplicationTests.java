@@ -14,6 +14,7 @@ class CloudStorageApplicationTests {
 	private int port;
 
 	private WebDriver driver;
+	private final String serverURL = "http://localhost:";
 
 	@BeforeAll
 	static void beforeAll() {
@@ -34,14 +35,21 @@ class CloudStorageApplicationTests {
 
 	@Test
 	public void getLoginPage() {
-		driver.get("http://localhost:" + this.port + "/login");
+		driver.get(serverURL + this.port + "/login");
 		Assertions.assertEquals("Login", driver.getTitle());
 	}
 
 	@Test
 	public void getSignUpPage() {
-		driver.get("http://localhost:" + this.port + "/signup");
+		driver.get(serverURL + this.port + "/signup");
 		Assertions.assertEquals("Sign Up", driver.getTitle());
+	}
+
+	@Test
+	public void logInInvalidUser() {
+		driver.get(serverURL + this.port + "/login");
+		LoginPage loginPage = new LoginPage(driver);
+		Assertions.assertEquals("Invalid username or password", loginPage.loginInvalidUser("username", "password").getErrorMessage());
 	}
 
 }
