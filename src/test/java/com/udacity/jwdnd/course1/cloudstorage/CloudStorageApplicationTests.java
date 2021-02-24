@@ -6,6 +6,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.test.annotation.DirtiesContext;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class CloudStorageApplicationTests {
@@ -50,6 +51,14 @@ class CloudStorageApplicationTests {
 		driver.get(serverURL + this.port + "/login");
 		LoginPage loginPage = new LoginPage(driver);
 		Assertions.assertEquals("Invalid username or password", loginPage.loginInvalidUser("username", "password").getErrorMessage());
+	}
+
+	@Test
+	public void logInValidUser() {
+		driver.get(serverURL + this.port + "/login");
+		LoginPage loginPage = new LoginPage(driver);
+		loginPage.loginValidUser("testUser", "testPassword");
+		Assertions.assertEquals("Home", driver.getTitle());
 	}
 
 }
