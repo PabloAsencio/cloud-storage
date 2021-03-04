@@ -6,10 +6,13 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
-import org.springframework.test.annotation.DirtiesContext;
+
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class CloudStorageApplicationTests {
+
+	private static final String SIGNUP_ERROR = "Example Signup Error Message";
+	private static final String SIGNUP_SUCCESS = "You successfully signed up! Please continue to the <a>login</a> page.";
 
 	@LocalServerPort
 	private int port;
@@ -59,6 +62,22 @@ class CloudStorageApplicationTests {
 		LoginPage loginPage = new LoginPage(driver);
 		loginPage.loginValidUser("testUser", "testPassword");
 		Assertions.assertEquals("Home", driver.getTitle());
+	}
+
+	@Test
+	public void signUpExistingUser() {
+		driver.get(serverURL + this.port + "/signup");
+		SignUpPage signUpPage = new SignUpPage(driver);
+		String errorMessage = signUpPage.registerNewUser("John", "Doe", "testUser", "testPassword").getErrorMessage();
+		Assertions.assertEquals(SIGNUP_ERROR, errorMessage);
+	}
+
+	@Test
+	public void signUpNewValidUser() {
+		driver.get(serverURL + this.port + "/signup");
+		SignUpPage signUpPage = new SignUpPage(driver);
+		String successMessage = signUpPage.registerNewUser("Jane", "Smith", "jane_smith", "newPassword").getSuccessMessage();
+		Assertions.assertEquals(SIGNUP_ERROR, successMessage);
 	}
 
 }
