@@ -11,8 +11,8 @@ import org.springframework.boot.web.server.LocalServerPort;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class CloudStorageApplicationTests {
 
-	private static final String SIGNUP_ERROR = "Example Signup Error Message";
-	private static final String SIGNUP_SUCCESS = "You successfully signed up! Please continue to the <a>login</a> page.";
+	private static final String SIGNUP_ERROR_USER_ALREADY_EXISTS = "The username already exists";
+	private static final String SIGNUP_SUCCESS = "You successfully signed up! Please continue to the login page.";
 
 	@LocalServerPort
 	private int port;
@@ -69,7 +69,7 @@ class CloudStorageApplicationTests {
 		driver.get(serverURL + this.port + "/signup");
 		SignUpPage signUpPage = new SignUpPage(driver);
 		String errorMessage = signUpPage.registerNewUser("John", "Doe", "testUser", "testPassword").getErrorMessage();
-		Assertions.assertEquals(SIGNUP_ERROR, errorMessage);
+		Assertions.assertEquals(SIGNUP_ERROR_USER_ALREADY_EXISTS, errorMessage);
 	}
 
 	@Test
@@ -77,7 +77,7 @@ class CloudStorageApplicationTests {
 		driver.get(serverURL + this.port + "/signup");
 		SignUpPage signUpPage = new SignUpPage(driver);
 		String successMessage = signUpPage.registerNewUser("Jane", "Smith", "jane_smith", "newPassword").getSuccessMessage();
-		Assertions.assertEquals(SIGNUP_ERROR, successMessage);
+		Assertions.assertEquals(SIGNUP_SUCCESS, successMessage);
 	}
 
 }
