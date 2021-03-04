@@ -1,6 +1,7 @@
 package com.udacity.jwdnd.course1.cloudstorage;
 
 import org.apache.juli.logging.Log;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.CacheLookup;
@@ -31,9 +32,14 @@ public class LoginPage {
     private WebElement logoutMessage;
 
     private final WebDriver driver;
+    // The native methods sendKeys and click do not work properly when switching pages several times
+    // due to race conditions. Using JavascriptExecutor to click elements and set the value of
+    // the input fields circumvents this issue.
+    private final JavascriptExecutor executor;
 
     public LoginPage(WebDriver driver) {
         this.driver = driver;
+        this.executor = (JavascriptExecutor) driver;
         PageFactory.initElements(driver, this);
     }
 
@@ -42,7 +48,11 @@ public class LoginPage {
      * @return a new SignUpPage
      */
     public SignUpPage goToSignUp() {
-        signupLink.click();
+        // For some reason clicking the signupLink directly with signupLink.click() will not always work, particularly
+        // in a sequence of more than two page loads inside a single test. This seems to be a problem with
+        // ChromeDriver when the driver is reused (see https://github.com/SeleniumHQ/selenium/issues/4075#issuecomment-456297277).
+        // Simulating the click with a javascript script seems to circumvent this issue.
+        executor.executeScript("arguments[0].click();", signupLink);
         return new SignUpPage(driver);
     }
 
@@ -78,7 +88,7 @@ public class LoginPage {
     public void login(final String username, final String password) {
         setUsername(username);
         setPassword(password);
-        submitButton.click();
+        executor.executeScript("arguments[0].click()", submitButton);
     }
 
     /**
@@ -86,8 +96,7 @@ public class LoginPage {
      * @param username
      */
     public void setUsername(final String username) {
-        inputUsername.clear();
-        inputUsername.sendKeys(username);
+        executor.executeScript("arguments[0].value='" + username + "';", inputUsername);
     }
 
     /**
@@ -95,8 +104,7 @@ public class LoginPage {
      * @param password
      */
     public void setPassword(final String password) {
-        inputPassword.clear();
-        inputPassword.sendKeys(password);
+        executor.executeScript("arguments[0].value='" + password + "';", inputPassword);
     }
 
     /**

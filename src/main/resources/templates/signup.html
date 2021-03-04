@@ -11,13 +11,13 @@
     <body class="p-3 mb-2 bg-light text-black">
         <div class="container justify-content-center w-50 p-3" style="background-color: #eeeeee; margin-top: 5em;">
             <div class="form-group">
-                <label><a th:href="@{/login}">Back to Login</a></label>
+                <label><a th:href="@{/login}" id="login-link">Back to Login</a></label>
             </div>
 
             <h1 class="display-5">Sign Up</h1>
             <form action="#" th:action="@{/signup}" method="POST">
                 <div id="message-success" class="alert alert-dark" th:if="${signupSuccess}">
-                    You successfully signed up! Please continue to the <a th:href="@{/login}" id="login-link">login</a> page.
+                    You successfully signed up! Please continue to the <a th:href="@{/login}" id="login-link--success">login</a> page.
                 </div>
                 <div id="message-error" class="alert alert-danger" th:if="${signupError}">
                     <span th:text="${signupError}">Example Signup Error Message</span>

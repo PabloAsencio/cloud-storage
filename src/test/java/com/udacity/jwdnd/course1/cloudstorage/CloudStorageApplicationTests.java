@@ -8,6 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
 
 
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class CloudStorageApplicationTests {
 
@@ -50,6 +51,28 @@ class CloudStorageApplicationTests {
 	}
 
 	@Test
+	public void getLoginPageFromSignUpPage() {
+		driver.get(serverURL + this.port + "/signup");
+		SignUpPage signUpPage = new SignUpPage(driver);
+		signUpPage.goToLoginPage();
+		Assertions.assertEquals("Login", driver.getTitle());
+	}
+
+	@Test
+	public void getSignUpPageFromLoginPage() {
+		driver.get(serverURL + this.port + "/login");
+		LoginPage loginPage = new LoginPage(driver);
+		loginPage.goToSignUp();
+		Assertions.assertEquals("Sign Up", driver.getTitle());
+	}
+
+	@Test
+	public void goingToHomePageUnauthenticatedRedirectsToLoginPage() {
+		driver.get(serverURL + this.port + "/home");
+		Assertions.assertEquals("Login", driver.getTitle());
+	}
+
+	@Test
 	public void logInInvalidUser() {
 		driver.get(serverURL + this.port + "/login");
 		LoginPage loginPage = new LoginPage(driver);
@@ -78,6 +101,52 @@ class CloudStorageApplicationTests {
 		SignUpPage signUpPage = new SignUpPage(driver);
 		String successMessage = signUpPage.registerNewUser("Jane", "Smith", "jane_smith", "newPassword").getSuccessMessage();
 		Assertions.assertEquals(SIGNUP_SUCCESS, successMessage);
+	}
+
+	@Test
+	public void signUpNewValidUserAndGoToLoginPage() {
+		String username = "original";
+		String password = "yetAnotherPassword";
+		driver.get(serverURL + this.port + "/signup");
+		SignUpPage signUpPage = new SignUpPage(driver);
+		signUpPage.registerNewUser("Guenther", "Frager", username, password).goToLoginPageAfterSuccess();
+		Assertions.assertEquals("Login", driver.getTitle());
+	}
+
+	@Test
+	public void signUpNewValidUserAndLogin() {
+		String username = "maestro";
+		String password = "anotherPassword";
+		driver.get(serverURL + this.port + "/signup");
+		SignUpPage signUpPage = new SignUpPage(driver);
+		SignUpPage afterSignup = signUpPage.registerNewUser("Johann Sebastian", "Mastropiero", username, password);
+		LoginPage loginPage = afterSignup.goToLoginPageAfterSuccess();
+		loginPage.login(username, password);
+		Assertions.assertEquals("Home", driver.getTitle());
+	}
+
+	@Test
+	public void goToSignUpPageFromLoginPageThenSignValidUserUp() {
+		String username = "corto-maltese";
+		String password = "andYetOneMorePassword";
+		driver.get(serverURL + this.port + "/login");
+		LoginPage start = new LoginPage(driver);
+		SignUpPage signUpPage = start.goToSignUp();
+		String successMessage = signUpPage.registerNewUser("Corto", "Maltese", username, password).getSuccessMessage();
+		Assertions.assertEquals(SIGNUP_SUCCESS, successMessage);
+
+	}
+
+	@Test
+	public void goToSignUpPageFromLoginPageThenSignNewUserUpAndLogin() {
+		String username = "superlopez";
+		String password = "oneMorePassword";
+		driver.get(serverURL + this.port + "/login");
+		LoginPage start = new LoginPage(driver);
+		SignUpPage signUpPage = start.goToSignUp();
+		LoginPage loginPage = signUpPage.registerNewUser("Juan", "Lopez", username, password).goToLoginPageAfterSuccess();
+		loginPage.login(username, password);
+		Assertions.assertEquals("Home", driver.getTitle());
 	}
 
 }

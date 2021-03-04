@@ -1,10 +1,16 @@
 package com.udacity.jwdnd.course1.cloudstorage;
 
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.CacheLookup;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import java.time.Duration;
 
 public class SignUpPage {
     @FindBy(id = "inputFirstName")
@@ -34,12 +40,23 @@ public class SignUpPage {
     private WebElement errorMessage;
 
     @FindBy(id = "login-link")
+    @CacheLookup
     private WebElement loginLink;
 
+    @FindBy(id = "login-link--success")
+    private WebElement successLoginLink;
+
     private final WebDriver driver;
+    private final WebDriverWait wait;
+    // The native methods sendKeys and click do not work properly when switching pages several times
+    // due to race conditions. Using JavascriptExecutor to click elements and set the value of
+    // the input fields circumvents this issue.
+    private final JavascriptExecutor executor;
 
     public SignUpPage(final WebDriver driver) {
         this.driver = driver;
+        this.wait = new WebDriverWait(driver,10);
+        this.executor = (JavascriptExecutor) driver;
         PageFactory.initElements(driver, this);
     }
 
@@ -56,7 +73,7 @@ public class SignUpPage {
         setLastName(lastName);
         setUsername(username);
         setPassword(password);
-        submitButton.click();
+        submitForm();
         return  new SignUpPage(driver);
     }
 
@@ -65,8 +82,7 @@ public class SignUpPage {
      * @param firstName
      */
     public void setFirstName(final String firstName) {
-        inputFirstName.clear();
-        inputFirstName.sendKeys(firstName);
+        executor.executeScript("arguments[0].value='" + firstName + "';", inputFirstName);
     }
 
     /**
@@ -74,8 +90,7 @@ public class SignUpPage {
      * @param lastName
      */
     public void setLastName(final String lastName) {
-        inputLastName.clear();
-        inputLastName.sendKeys(lastName);
+        executor.executeScript("arguments[0].value='" + lastName + "';", inputLastName);
     }
 
     /**
@@ -83,8 +98,7 @@ public class SignUpPage {
      * @param username
      */
     public void setUsername(final String username) {
-        inputUsername.clear();
-        inputUsername.sendKeys(username);
+        executor.executeScript("arguments[0].value='" + username + "';", inputUsername);
     }
 
     /**
@@ -92,8 +106,14 @@ public class SignUpPage {
      * @param password
      */
     public void setPassword(final String password) {
-        inputPassword.clear();
-        inputPassword.sendKeys(password);
+        executor.executeScript("arguments[0].value='" + password + "';", inputPassword);
+    }
+
+    /**
+     * Submits the signup form
+     */
+    public void submitForm() {
+        executor.executeScript("arguments[0].click()", submitButton);
     }
 
     /**
@@ -106,10 +126,25 @@ public class SignUpPage {
     }
 
     /**
+     * Tries to click on the link to the login page after having
+     * successfully signed up a new user
+     * @return a new LoginPage
+     */
+    public LoginPage goToLoginPageAfterSuccess() {
+        // For some reason clicking the successLoginLink directly with successLoginLink.click() will not work
+        // although the link is enabled at the time this method is reached. This seems to be a problem with
+        // ChromeDriver when the driver is reused (see https://github.com/SeleniumHQ/selenium/issues/4075#issuecomment-456297277).
+        // Simulating the click with a javascript script seems to circumvent this issue.
+        executor.executeScript("arguments[0].click();", successLoginLink);
+        return new LoginPage(driver);
+    }
+
+    /**
      * Tries to get the success message and returns it
      * @return a success message
      */
     public String getSuccessMessage() {
+        wait.until(ExpectedConditions.elementToBeClickable(successMessage));
         return successMessage.getText();
     }
 
