@@ -7,6 +7,8 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.CacheLookup;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class LoginPage {
     @FindBy(id = "inputUsername")
@@ -36,10 +38,12 @@ public class LoginPage {
     // due to race conditions. Using JavascriptExecutor to click elements and set the value of
     // the input fields circumvents this issue.
     private final JavascriptExecutor executor;
+    private final WebDriverWait wait;
 
     public LoginPage(WebDriver driver) {
         this.driver = driver;
         this.executor = (JavascriptExecutor) driver;
+        this.wait = new WebDriverWait(driver, 5);
         PageFactory.initElements(driver, this);
     }
 
@@ -120,6 +124,7 @@ public class LoginPage {
      * @return a logout message
      */
     public String getLogoutMessage() {
+        wait.until(ExpectedConditions.elementToBeClickable(logoutMessage));
         return logoutMessage.getText();
     }
 }

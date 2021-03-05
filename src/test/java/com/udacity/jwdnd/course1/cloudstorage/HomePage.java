@@ -1,5 +1,6 @@
 package com.udacity.jwdnd.course1.cloudstorage;
 
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.CacheLookup;
@@ -13,9 +14,11 @@ public class HomePage {
     private WebElement logoutButton;
 
     private final WebDriver driver;
+    private final JavascriptExecutor executor;
 
     public HomePage(WebDriver driver) {
         this.driver = driver;
+        this.executor = (JavascriptExecutor) driver;
         PageFactory.initElements(driver, this);
     }
 
@@ -24,7 +27,7 @@ public class HomePage {
      * @return a new LoginPage
      */
     public LoginPage logout() {
-        logoutButton.click();
+        executor.executeScript("arguments[0].click()", logoutButton);
         return new LoginPage(driver);
     }
 }

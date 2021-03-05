@@ -116,11 +116,11 @@ class CloudStorageApplicationTests {
 
 	@Test
 	public void signUpNewValidUserAndLogin() {
-		String username = "maestro";
-		String password = "anotherPassword";
+		String username = "kermit";
+		String password = "soManyPasswords";
 		driver.get(serverURL + this.port + "/signup");
 		SignUpPage signUpPage = new SignUpPage(driver);
-		SignUpPage afterSignup = signUpPage.registerNewUser("Johann Sebastian", "Mastropiero", username, password);
+		SignUpPage afterSignup = signUpPage.registerNewUser("Kermit", "The Frog", username, password);
 		LoginPage loginPage = afterSignup.goToLoginPageAfterSuccess();
 		loginPage.loginValidUser(username, password);
 		Assertions.assertEquals("Home", driver.getTitle());
@@ -128,12 +128,12 @@ class CloudStorageApplicationTests {
 
 	@Test
 	public void goToSignUpPageFromLoginPageThenSignValidUserUp() {
-		String username = "corto-maltese";
-		String password = "andYetOneMorePassword";
+		String username = "filemon";
+		String password = "dontForgetYourPassword";
 		driver.get(serverURL + this.port + "/login");
 		LoginPage start = new LoginPage(driver);
 		SignUpPage signUpPage = start.goToSignUp();
-		String successMessage = signUpPage.registerNewUser("Corto", "Maltese", username, password).getSuccessMessage();
+		String successMessage = signUpPage.registerNewUser("Filemon", "Pi", username, password).getSuccessMessage();
 		Assertions.assertEquals(SIGNUP_SUCCESS, successMessage);
 
 	}
