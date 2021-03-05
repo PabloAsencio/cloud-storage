@@ -14,6 +14,7 @@ class CloudStorageApplicationTests {
 
 	private static final String SIGNUP_ERROR_USER_ALREADY_EXISTS = "The username already exists";
 	private static final String SIGNUP_SUCCESS = "You successfully signed up! Please continue to the login page.";
+	private static final String LOGOUT_MESSAGE = "You have been logged out";
 
 	@LocalServerPort
 	private int port;
@@ -121,7 +122,7 @@ class CloudStorageApplicationTests {
 		SignUpPage signUpPage = new SignUpPage(driver);
 		SignUpPage afterSignup = signUpPage.registerNewUser("Johann Sebastian", "Mastropiero", username, password);
 		LoginPage loginPage = afterSignup.goToLoginPageAfterSuccess();
-		loginPage.login(username, password);
+		loginPage.loginValidUser(username, password);
 		Assertions.assertEquals("Home", driver.getTitle());
 	}
 
@@ -145,8 +146,40 @@ class CloudStorageApplicationTests {
 		LoginPage start = new LoginPage(driver);
 		SignUpPage signUpPage = start.goToSignUp();
 		LoginPage loginPage = signUpPage.registerNewUser("Juan", "Lopez", username, password).goToLoginPageAfterSuccess();
-		loginPage.login(username, password);
+		loginPage.loginValidUser(username, password);
 		Assertions.assertEquals("Home", driver.getTitle());
+	}
+
+	@Test
+	public void logInValidUserAndLogOut() {
+		driver.get(serverURL + this.port + "/login");
+		LoginPage loginPage = new LoginPage(driver);
+		HomePage homePage = loginPage.loginValidUser("testUser", "testPassword");
+		String logoutMessage = homePage.logout().getLogoutMessage();
+		Assertions.assertEquals(LOGOUT_MESSAGE, logoutMessage);
+	}
+
+	@Test
+	public void logOutAndNavigateToHomeRedirectsToLogin() {
+		driver.get(serverURL + this.port + "/login");
+		LoginPage loginPage = new LoginPage(driver);
+		HomePage homePage = loginPage.loginValidUser("testUser", "testPassword");
+		homePage.logout();
+		driver.get(serverURL + this.port + "/home");
+		Assertions.assertEquals("Login", driver.getTitle());
+	}
+
+	@Test
+	public void signUpNewUserLogInAndLogOut() {
+		String username = "maestro";
+		String password = "anotherPassword";
+		driver.get(serverURL + this.port + "/signup");
+		SignUpPage signUpPage = new SignUpPage(driver);
+		SignUpPage afterSignup = signUpPage.registerNewUser("Johann Sebastian", "Mastropiero", username, password);
+		LoginPage loginPage = afterSignup.goToLoginPageAfterSuccess();
+		HomePage homePage = loginPage.loginValidUser(username, password);
+		String logoutMessage = homePage.logout().getLogoutMessage();
+		Assertions.assertEquals(LOGOUT_MESSAGE, logoutMessage);
 	}
 
 }
