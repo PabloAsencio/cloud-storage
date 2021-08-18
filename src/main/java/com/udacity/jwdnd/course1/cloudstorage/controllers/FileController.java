@@ -32,13 +32,15 @@ public class FileController {
     public String handleFileUpload(@RequestParam("fileUpload") MultipartFile fileUpload, Authentication authentication, Model model) {
         try (InputStream fileInputStream = fileUpload.getInputStream()) {
             UploadedFile file = new UploadedFile();
-            if (null == fileMapper.getFileByName(fileUpload.getOriginalFilename())) {
+            String username = authentication.getName();
+            User user = userMapper.getUser(username);
+            Integer userid = user.getUserid();
+
+            if (null == fileMapper.getFileByName(fileUpload.getOriginalFilename(), userid)) {
                 file.setFilename(fileUpload.getOriginalFilename());
                 file.setContenttype(fileUpload.getContentType());
                 file.setFilesize(String.valueOf(fileUpload.getSize()));
-                String username = authentication.getName();
-                User user = userMapper.getUser(username);
-                file.setUserid(user.getUserid());
+                file.setUserid(userid);
                 file.setFiledata(fileUpload.getBytes());
                 if (file.getFiledata().length > 0) {
                     fileMapper.insert(file);
