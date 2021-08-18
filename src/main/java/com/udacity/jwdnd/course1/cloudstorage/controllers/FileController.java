@@ -44,12 +44,15 @@ public class FileController {
                     fileMapper.insert(file);
                 } else {
                     model.addAttribute("error", true);
+                    model.addAttribute("errorMessage", "No file was selected. Please select a file to upload.");
                 }
             } else {
                 model.addAttribute("error", true);
+                model.addAttribute("errorMessage", "You already have a file named " + fileUpload.getOriginalFilename() + ". Please choose a different name.");
             }
         } catch (IOException exception) {
             model.addAttribute("error", true);
+            model.addAttribute("errorMessage", "An error occurred while uploading your file.");
         }
         return "result";
     }
