@@ -69,6 +69,7 @@ public class FileController {
             fileMapper.delete(fileId);
         } else {
             model.addAttribute("error", true);
+            model.addAttribute("errorMessage", "You do not have permission to delete this file");
         }
 
         return "result";
@@ -84,6 +85,12 @@ public class FileController {
             response.setContentType(file.getContenttype());
             try (OutputStream out = response.getOutputStream()) {
                 out.write(file.getFiledata());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            try {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "You do not have permission to view this file.");
             } catch (IOException e) {
                 e.printStackTrace();
             }
