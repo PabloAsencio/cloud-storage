@@ -25,7 +25,7 @@
                 </nav>
                 <div class="tab-content" id="nav-tabContent">
                     <div class="tab-pane fade show active" id="nav-files" role="tabpanel" aria-labelledby="nav-files-tab">
-                        <form action="#" enctype="multipart/form-data" th:action="@{/file-upload}" method="POST">
+                        <form action="#" enctype="multipart/form-data" th:action="@{/upload-file}" method="POST">
                             <div class="container">
                                 <div class="row" style="margin: 1em;">
                                     <div class="col-sm-2">
@@ -52,7 +52,12 @@
                                 <tr th:each="file : ${files}">
                                     <td>
                                         <a target="_blank" class="btn btn-success" th:href="@{/download-file/{id}(id = ${file.fileId})}">View</a>
-                                        <a  class="btn btn-danger" th:href="@{/delete-file/{id}(id = ${file.fileId})}">Delete</a>
+                                        <!-- We need to use a form to wrap the Delete button because otherwise we would not be able to use
+                                             the HTTP POST method. Using GET would be inappropriate for a delete operation, since a GET
+                                             request is supposed to be idempotent. -->
+                                        <form action="#" th:action="@{/delete-file/{id}(id = ${file.fileId})}" method="POST" style="display:inline-block">
+                                            <button type="submit" class="btn btn-danger">Delete</button>
+                                        </form>
                                     </td>
                                     <th scope="row" th:text="${file.filename}">ExampleFile.txt</th>
                                 </tr>

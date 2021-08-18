@@ -28,7 +28,7 @@ public class FileController {
         this.fileMapper = fileMapper;
     }
 
-    @PostMapping("/file-upload")
+    @PostMapping("/upload-file")
     public String handleFileUpload(@RequestParam("fileUpload") MultipartFile fileUpload, Authentication authentication, Model model) {
         try (InputStream fileInputStream = fileUpload.getInputStream()) {
             UploadedFile file = new UploadedFile();
@@ -54,10 +54,7 @@ public class FileController {
         return "result";
     }
 
-    // This should be a DeleteMapping or at least a PostMapping since this method call is not idempotent.
-    // We use a GetMapping because the provided template implements the buttons as
-    // anchor tags instead of using forms. Anchor tags do not allow for using any other method than get.
-    @GetMapping("/delete-file/{id}")
+    @PostMapping("/delete-file/{id}")
     public String deleteFile(@PathVariable String id, Authentication authentication, Model model) {
         Integer fileId = Integer.parseInt(id);
         String username = authentication.getName();
