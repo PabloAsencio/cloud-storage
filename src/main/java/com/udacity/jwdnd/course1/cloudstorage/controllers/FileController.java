@@ -15,7 +15,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 
 @Controller
@@ -30,74 +29,101 @@ public class FileController {
 
     @PostMapping("/upload-file")
     public String handleFileUpload(@RequestParam("fileUpload") MultipartFile fileUpload, Authentication authentication, Model model) {
-        try (InputStream fileInputStream = fileUpload.getInputStream()) {
-            UploadedFile file = new UploadedFile();
-            String username = authentication.getName();
-            User user = userMapper.getUser(username);
-            Integer userid = user.getUserid();
-
-            if (null == fileMapper.getFileByName(fileUpload.getOriginalFilename(), userid)) {
-                file.setFilename(fileUpload.getOriginalFilename());
-                file.setContenttype(fileUpload.getContentType());
-                file.setFilesize(String.valueOf(fileUpload.getSize()));
-                file.setUserid(userid);
-                file.setFiledata(fileUpload.getBytes());
-                if (file.getFiledata().length > 0) {
-                    fileMapper.insert(file);
-                } else {
-                    model.addAttribute("error", true);
-                    model.addAttribute("errorMessage", "No file was selected. Please select a file to upload.");
-                }
-            } else {
-                model.addAttribute("error", true);
-                model.addAttribute("errorMessage", "You already have a file named " + fileUpload.getOriginalFilename() + ". Please choose a different name.");
+        User user = getUser(authentication);
+        if (!userHasFileWithSameName(fileUpload, user)) {
+            try {
+                UploadedFile file = createFile(fileUpload, user);
+                saveFile(file, model);
+            } catch (IOException exception) {
+                setErrorMessage(model, "An error occurred while uploading your file.");
             }
-        } catch (IOException exception) {
-            model.addAttribute("error", true);
-            model.addAttribute("errorMessage", "An error occurred while uploading your file.");
+        } else {
+            setErrorMessage(model, "You already have a file named " + fileUpload.getOriginalFilename() + ". Please choose a different name.");
         }
+
         return "result";
     }
 
+
     @PostMapping("/delete-file/{id}")
-    public String deleteFile(@PathVariable String id, Authentication authentication, Model model) {
+    public String handleFileDeletion(@PathVariable String id, Authentication authentication, Model model) {
         Integer fileId = Integer.parseInt(id);
-        String username = authentication.getName();
-        User user = userMapper.getUser(username);
+        User user = getUser(authentication);
         UploadedFile file = fileMapper.getFileById(fileId);
-        if (file.getUserid() == user.getUserid()) {
+        if (userOwnsFile(file, user)) {
             fileMapper.delete(fileId);
         } else {
-            model.addAttribute("error", true);
-            model.addAttribute("errorMessage", "You do not have permission to delete this file");
+            setErrorMessage(model, "You do not have permission to delete this file");
         }
 
         return "result";
     }
 
     @GetMapping("/download-file/{id}")
-    public void downloadFile(@PathVariable String id, HttpServletResponse response, Authentication authentication) {
+    public void handleFileDownload(@PathVariable String id, HttpServletResponse response, Authentication authentication) {
         Integer fileId = Integer.parseInt(id);
-        String username = authentication.getName();
-        User user = userMapper.getUser(username);
+        User user = getUser(authentication);
         UploadedFile file = fileMapper.getFileById(fileId);
-        if (file.getUserid() == user.getUserid()) {
-            response.setContentType(file.getContenttype());
-            try (OutputStream out = response.getOutputStream()) {
-                out.write(file.getFiledata());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        if (userOwnsFile(file, user)) {
+            sendFile(response, file);
         } else {
-            try {
-                response.sendError(HttpServletResponse.SC_FORBIDDEN, "You do not have permission to view this file.");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            sendError(response, "You do not have permission to view this file.");
         }
     }
 
-    ;
+    private User getUser(Authentication authentication) {
+        String username = authentication.getName();
+        return userMapper.getUser(username);
+    }
 
+    private boolean userHasFileWithSameName(MultipartFile file, User user) {
+        final String originalFilename = file.getOriginalFilename();
+        final Integer userid = user.getUserid();
+        return null != fileMapper.getFileByName(originalFilename, userid);
+    }
+
+    private boolean userOwnsFile(UploadedFile file, User user) {
+        return null != file && file.getUserid() == user.getUserid();
+    }
+
+    private void saveFile(UploadedFile file, Model model) {
+        if (file.getFiledata().length > 0) {
+            fileMapper.insert(file);
+        } else {
+            setErrorMessage(model, "No file was selected. Please select a file to upload.");
+        }
+    }
+
+    private UploadedFile createFile(MultipartFile fileUpload, User user) throws IOException {
+        UploadedFile file = new UploadedFile();
+        file.setFilename(fileUpload.getOriginalFilename());
+        file.setContenttype(fileUpload.getContentType());
+        file.setFilesize(String.valueOf(fileUpload.getSize()));
+        file.setUserid(user.getUserid());
+        file.setFiledata(fileUpload.getBytes());
+        return file;
+    }
+
+    private void sendFile(HttpServletResponse response, UploadedFile file) {
+        response.setContentType(file.getContenttype());
+        try (OutputStream out = response.getOutputStream()) {
+            out.write(file.getFiledata());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void setErrorMessage(Model model, String errorMessage) {
+        model.addAttribute("error", true);
+        model.addAttribute("errorMessage", errorMessage);
+    }
+
+    private void sendError(HttpServletResponse response, String errorMessage) {
+        try {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, errorMessage);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
 }
