@@ -30,4 +30,12 @@ public class CredentialService {
     public List<Credential> getUserCredentials(Integer userid) {
         return credentialMapper.getUserCredentials(userid);
     }
+
+    public Credential getCredentialById(Integer credentialid) {
+        return credentialMapper.getCredentialById(credentialid);
+    }
+
+    public String getDecryptedPassword(Credential credential) {
+        return encryptionService.decryptValue(credential.getPassword(), credential.getKey());
+    }
 }
