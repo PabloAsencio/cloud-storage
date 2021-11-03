@@ -66,11 +66,11 @@
                         </div>
                     </div>
                     <div class="tab-pane fade" id="nav-notes" role="tabpanel" aria-labelledby="nav-notes-tab">
-                        <button style="margin: 0.25em;" type="button" class="btn btn-info float-right" onclick="showNoteModal()">
+                        <button style="margin: 0.25em;" type="button" class="btn btn-info float-right" id="create-note-button" onclick="showNoteModal()">
                             + Add a New Note
                         </button>
 
-                        <div class="table-responsive">
+                        <div class="table-responsive" th:if="${notes.size() > 0}">
                             <table class="table table-striped" id="userTable">
                                 <thead>
                                     <tr>
@@ -80,13 +80,17 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
+                                    <tr th:each="note : ${notes}" class="note">
                                         <td>
-                                            <button type="button" class="btn btn-success">Edit</button>
-                                            <a class="btn btn-danger">Delete</a>
+                                            <button type="button" class="btn btn-success"
+                                                    th:attr="data-note-id=${note.noteid},data-note-title=${note.notetitle},data-note-description=${note.notedescription}"
+                                                    onclick="showNoteModal(this.getAttribute('data-note-id'), this.getAttribute('data-note-title'), this.getAttribute('data-note-description') )">Edit</button>
+                                            <form action="#" th:action="@{/delete-note/{id}(id = ${note.noteid})}" method="POST" style="display:inline-block">
+                                                <button type="submit" class="btn btn-danger">Delete</button>
+                                            </form>
                                         </td>
-                                        <th scope="row">Example Note Title</th>
-                                        <td>Example Note Description </td>
+                                        <th scope="row" th:text="${note.notetitle}" class="note__title">Example Note Title</th>
+                                        <td th:text="${note.notedescription}" class="note__description">Example Note Description </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -102,22 +106,22 @@
                                         </button>
                                     </div>
                                     <div class="modal-body">
-                                        <form action="#" method="POST">
-                                            <input type="hidden" name="noteId" id="note-id">
+                                        <form action="#" th:action="@{/submit-note}" method="POST">
+                                            <input type="hidden" name="noteid" id="note-id">
                                             <div class="form-group">
                                                 <label for="note-title" class="col-form-label">Title</label>
-                                                <input type="text" name= "noteTitle" class="form-control" id="note-title" maxlength="20" required>
+                                                <input type="text" name= "notetitle" class="form-control" id="note-title" maxlength="20" required>
                                             </div>
                                             <div class="form-group">
                                                 <label for="note-description" class="col-form-label">Description</label>
-                                                <textarea class="form-control" name="noteDescription" id="note-description" rows="5" maxlength="1000" required></textarea>
+                                                <textarea class="form-control" name="notedescription" id="note-description" rows="5" maxlength="1000" required></textarea>
                                             </div>
                                             <button id="noteSubmit" type="submit" class="d-none"></button>
                                         </form>
                                     </div>
                                     <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                        <button type="button" class="btn btn-primary" onclick="$('#noteSubmit').click();">Save changes</button>
+                                        <button type="button" class="btn btn-secondary" id="note-modal-dismiss" data-dismiss="modal">Close</button>
+                                        <button type="button" class="btn btn-primary" id="note-submit-button" onclick="$('#noteSubmit').click();">Save changes</button>
                                     </div>
                                 </div>
                             </div>
