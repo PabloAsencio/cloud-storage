@@ -50,4 +50,8 @@ public class CredentialService {
         byte[] key = new byte[16];
         return Base64.getEncoder().encodeToString(key);
     }
+
+    public void deleteCredential(Integer credentialid) {
+        credentialMapper.deleteCredential(credentialid);
+    }
 }

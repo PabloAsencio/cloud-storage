@@ -36,7 +36,7 @@ public class CredentialController {
             if (userOwnsCredential(user, newCredential.getCredentialid())) {
                 credentialService.updateCredential(newCredential);
             } else {
-                setErrorMessage(model, "You don't own this credential");
+                setErrorMessage(model, "You do not have permission to change this credential");
             }
         }
 
@@ -58,6 +58,19 @@ public class CredentialController {
             return new ResponseEntity<String>("{\"error\": \"Unauthorized access\"}", HttpStatus.FORBIDDEN);
         }
 
+    }
+
+    @PostMapping("/delete-credential/{id}")
+    public String handleCredentialDeletion(@PathVariable String id, Authentication authentication, Model model) {
+        Integer credentialid = Integer.parseInt(id);
+        User user = getUser(authentication);
+        if (userOwnsCredential(user, credentialid)) {
+            credentialService.deleteCredential(credentialid);
+        } else {
+            setErrorMessage(model, "You do not have permission to delete this credential");
+        }
+
+        return "result";
     }
 
     private boolean userOwnsCredential(User user, Integer credentialid) {

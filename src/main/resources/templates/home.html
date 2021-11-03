@@ -148,7 +148,10 @@
                                         <button type="button" class="btn btn-success"
                                         th:attr="data-credential-id=${credential.credentialid},data-credential-url=${credential.url},data-credential-username=${credential.username},data-credential-password=${credential.password}"
                                         onclick="showCredentialModal(this.getAttribute('data-credential-id'), this.getAttribute('data-credential-url'), this.getAttribute('data-credential-username'), this.getAttribute('data-credential-password'))">Edit</button>
-                                        <a class="btn btn-danger">Delete</a>
+                                        <form action="#" th:action="@{/delete-credential/{id}(id = ${credential.credentialid})}" method="POST" style="display: inline-block">
+                                            <button type="submit" class="btn btn-danger">Delete</button>
+                                        </form>
+
                                     </td>
                                     <th scope="row" th:text="${credential.url}">Example Credential URL</th>
                                     <td th:text="${credential.username}">Example Credential Username</td>
