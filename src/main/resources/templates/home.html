@@ -128,12 +128,12 @@
                         </div>
                     </div>
                     <div class="tab-pane fade" id="nav-credentials" role="tabpanel" aria-labelledby="nav-credentials-tab">
-                        <button style="margin: 0.25em;" type="button" class="btn btn-info float-right" onclick="showCredentialModal()">
+                        <button style="margin: 0.25em;" type="button" class="btn btn-info float-right" id="create-credential-button" onclick="showCredentialModal()">
                             + Add a New Credential
                         </button>
 
-                        <div class="table-responsive">
-                            <table class="table table-striped" th:object="${credentials}" id="credentialTable">
+                        <div class="table-responsive" th:if="${credentials.size() > 0}">
+                            <table class="table table-striped" id="credentialTable">
                                 <thead>
                                     <tr>
                                         <th style="width: 20%" scope="col"></th>
@@ -143,14 +143,19 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                <tr>
+                                <tr th:each="credential : ${credentials}" class="credential">
                                     <td>
-                                        <button type="button" class="btn btn-success">Edit</button>
-                                        <a class="btn btn-danger">Delete</a>
+                                        <button type="button" class="btn btn-success"
+                                        th:attr="data-credential-id=${credential.credentialid},data-credential-url=${credential.url},data-credential-username=${credential.username},data-credential-password=${credential.password}"
+                                        onclick="showCredentialModal(this.getAttribute('data-credential-id'), this.getAttribute('data-credential-url'), this.getAttribute('data-credential-username'), this.getAttribute('data-credential-password'))">Edit</button>
+                                        <form action="#" th:action="@{/delete-credential/{id}(id = ${credential.credentialid})}" method="POST" style="display: inline-block">
+                                            <button type="submit" class="btn btn-danger">Delete</button>
+                                        </form>
+
                                     </td>
-                                    <th scope="row">Example Credential URL</th>
-                                    <td>Example Credential Username</td>
-                                    <td>Example Credential Password</td>
+                                    <th scope="row" th:text="${credential.url}" class="credential__url">Example Credential URL</th>
+                                    <td th:text="${credential.username}" class="credential__username">Example Credential Username</td>
+                                    <td th:text="${credential.password}" class="credential__password">Example Credential Password</td>
                                 </tr>
                                 </tbody>
                             </table>
@@ -166,8 +171,8 @@
                                         </button>
                                     </div>
                                     <div class="modal-body">
-                                        <form action="#" method="POST">
-                                            <input type="hidden" name="credentialId" id="credential-id">
+                                        <form action="#"  th:action="@{/submit-credential}" method="POST">
+                                            <input type="hidden" name="credentialid" id="credential-id">
                                             <div class="form-group">
                                                 <label for="note-title" class="col-form-label">URL</label>
                                                 <input type="text" name= "url" class="form-control" id="credential-url" maxlength="100" required>
@@ -211,10 +216,21 @@
 
             // For opening the credentials modal
             function showCredentialModal(credentialId, url, username, password) {
+                if (credentialId) {
+                    fetch(`/retrieve-password/${credentialId}`)
+                        .then( response => response.json())
+                        .then(data => {
+                            $('#credential-password').val(data.password ? data.password : '');
+                        })
+                        .catch(error => {
+                            $('#credential-password').val(password ? password : '');
+                        });
+                } else {
+                    $('#credential-password').val(password ? password : '');
+                }
                 $('#credential-id').val(credentialId ? credentialId : '');
                 $('#credential-url').val(url ? url : '');
                 $('#credential-username').val(username ? username : '');
-                $('#credential-password').val(password ? password : '');
                 $('#credentialModal').modal('show');
             }
         </script>
