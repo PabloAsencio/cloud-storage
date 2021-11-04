@@ -1,9 +1,9 @@
 package com.udacity.jwdnd.course1.cloudstorage.controllers;
 
-import com.udacity.jwdnd.course1.cloudstorage.mappers.FileMapper;
-import com.udacity.jwdnd.course1.cloudstorage.mappers.UserMapper;
 import com.udacity.jwdnd.course1.cloudstorage.model.UploadedFile;
 import com.udacity.jwdnd.course1.cloudstorage.model.User;
+import com.udacity.jwdnd.course1.cloudstorage.services.FileService;
+import com.udacity.jwdnd.course1.cloudstorage.services.UserService;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,17 +19,18 @@ import java.io.OutputStream;
 
 @Controller
 public class FileController {
-    private UserMapper userMapper;
-    private FileMapper fileMapper;
 
-    public FileController(UserMapper userMapper, FileMapper fileMapper) {
-        this.userMapper = userMapper;
-        this.fileMapper = fileMapper;
+    private UserService userService;
+    private FileService fileService;
+
+    public FileController(UserService userService, FileService fileService) {
+        this.userService = userService;
+        this.fileService = fileService;
     }
 
     @PostMapping("/upload-file")
     public String handleFileUpload(@RequestParam("fileUpload") MultipartFile fileUpload, Authentication authentication, Model model) {
-        User user = getUser(authentication);
+        User user = userService.getUser(authentication);
         if (!userHasFileWithSameName(fileUpload, user)) {
             try {
                 UploadedFile file = createFile(fileUpload, user);
@@ -48,10 +49,10 @@ public class FileController {
     @PostMapping("/delete-file/{id}")
     public String handleFileDeletion(@PathVariable String id, Authentication authentication, Model model) {
         Integer fileId = Integer.parseInt(id);
-        User user = getUser(authentication);
-        UploadedFile file = fileMapper.getFileById(fileId);
+        User user = userService.getUser(authentication);
+        UploadedFile file = fileService.getFileById(fileId);
         if (userOwnsFile(file, user)) {
-            fileMapper.delete(fileId);
+            fileService.deleteFile(fileId);
         } else {
             setErrorMessage(model, "You do not have permission to delete this file");
         }
@@ -62,8 +63,8 @@ public class FileController {
     @GetMapping("/download-file/{id}")
     public void handleFileDownload(@PathVariable String id, HttpServletResponse response, Authentication authentication) {
         Integer fileId = Integer.parseInt(id);
-        User user = getUser(authentication);
-        UploadedFile file = fileMapper.getFileById(fileId);
+        User user = userService.getUser(authentication);
+        UploadedFile file = fileService.getFileById(fileId);
         if (userOwnsFile(file, user)) {
             sendFile(response, file);
         } else {
@@ -71,15 +72,10 @@ public class FileController {
         }
     }
 
-    private User getUser(Authentication authentication) {
-        String username = authentication.getName();
-        return userMapper.getUser(username);
-    }
-
     private boolean userHasFileWithSameName(MultipartFile file, User user) {
         final String originalFilename = file.getOriginalFilename();
         final Integer userid = user.getUserid();
-        return null != fileMapper.getFileByName(originalFilename, userid);
+        return null != fileService.getFileByName(originalFilename, userid);
     }
 
     private boolean userOwnsFile(UploadedFile file, User user) {
@@ -88,7 +84,7 @@ public class FileController {
 
     private void saveFile(UploadedFile file, Model model) {
         if (file.getFiledata().length > 0) {
-            fileMapper.insert(file);
+            fileService.createFile(file);
         } else {
             setErrorMessage(model, "No file was selected. Please select a file to upload.");
         }

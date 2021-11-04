@@ -27,7 +27,7 @@ public class CredentialController {
 
     @PostMapping("/submit-credential")
     public String handleCredentialSubmission(@ModelAttribute("newCredential") Credential newCredential, Authentication authentication, Model model) {
-        User user = getUser(authentication);
+        User user = userService.getUser(authentication);
 
         if (null == newCredential.getCredentialid()) {
             newCredential.setUserid(user.getUserid());
@@ -47,7 +47,7 @@ public class CredentialController {
     @GetMapping(value = "/retrieve-password/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseEntity<String> retrievePassword(@PathVariable String id, Authentication authentication) {
-        User user = getUser(authentication);
+        User user = userService.getUser(authentication);
         Integer credentialid = Integer.parseInt(id);
         Credential credential = credentialService.getCredentialById(credentialid);
         if (credential.getUserid() == user.getUserid()) {
@@ -63,7 +63,7 @@ public class CredentialController {
     @PostMapping("/delete-credential/{id}")
     public String handleCredentialDeletion(@PathVariable String id, Authentication authentication, Model model) {
         Integer credentialid = Integer.parseInt(id);
-        User user = getUser(authentication);
+        User user = userService.getUser(authentication);
         if (userOwnsCredential(user, credentialid)) {
             credentialService.deleteCredential(credentialid);
         } else {
@@ -76,11 +76,6 @@ public class CredentialController {
     private boolean userOwnsCredential(User user, Integer credentialid) {
         Credential storedCredential = credentialService.getCredentialById(credentialid);
         return storedCredential != null && storedCredential.getUserid() == user.getUserid();
-    }
-
-    private User getUser(Authentication authentication) {
-        String username = authentication.getName();
-        return userService.getUser(username);
     }
 
     private void setErrorMessage(Model model, String errorMessage) {
