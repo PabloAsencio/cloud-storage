@@ -30,7 +30,7 @@ public class FileController {
 
     @PostMapping("/upload-file")
     public String handleFileUpload(@RequestParam("fileUpload") MultipartFile fileUpload, Authentication authentication, Model model) {
-        User user = getUser(authentication);
+        User user = userService.getUser(authentication);
         if (!userHasFileWithSameName(fileUpload, user)) {
             try {
                 UploadedFile file = createFile(fileUpload, user);
@@ -49,7 +49,7 @@ public class FileController {
     @PostMapping("/delete-file/{id}")
     public String handleFileDeletion(@PathVariable String id, Authentication authentication, Model model) {
         Integer fileId = Integer.parseInt(id);
-        User user = getUser(authentication);
+        User user = userService.getUser(authentication);
         UploadedFile file = fileService.getFileById(fileId);
         if (userOwnsFile(file, user)) {
             fileService.deleteFile(fileId);
@@ -63,18 +63,13 @@ public class FileController {
     @GetMapping("/download-file/{id}")
     public void handleFileDownload(@PathVariable String id, HttpServletResponse response, Authentication authentication) {
         Integer fileId = Integer.parseInt(id);
-        User user = getUser(authentication);
+        User user = userService.getUser(authentication);
         UploadedFile file = fileService.getFileById(fileId);
         if (userOwnsFile(file, user)) {
             sendFile(response, file);
         } else {
             sendError(response, "You do not have permission to view this file.");
         }
-    }
-
-    private User getUser(Authentication authentication) {
-        String username = authentication.getName();
-        return userService.getUser(username);
     }
 
     private boolean userHasFileWithSameName(MultipartFile file, User user) {

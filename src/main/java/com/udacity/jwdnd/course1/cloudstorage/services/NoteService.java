@@ -4,6 +4,8 @@ import com.udacity.jwdnd.course1.cloudstorage.mappers.NoteMapper;
 import com.udacity.jwdnd.course1.cloudstorage.model.Note;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class NoteService {
 
@@ -31,5 +33,9 @@ public class NoteService {
 
     public void deleteNote(Integer id) {
         noteMapper.deleteNote(id);
+    }
+
+    public List<Note> getUserNotes(Integer userid) {
+        return noteMapper.getUserNotes(userid);
     }
 }

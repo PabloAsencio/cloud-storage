@@ -24,7 +24,7 @@ public class NoteController {
 
     @PostMapping("/submit-note")
     public String handleNoteSubmission(@ModelAttribute("newNote") Note newNote, Authentication authentication, Model model) {
-        User user = getUser(authentication);
+        User user = userService.getUser(authentication);
 
         if (null == newNote.getNoteid()) {
             if (!userHasNoteWithSameTitle(newNote, user)) {
@@ -46,7 +46,7 @@ public class NoteController {
     @PostMapping("/delete-note/{id}")
     public String handleNoteDeletion(@PathVariable String id, Authentication authentication, Model model) {
         Integer noteId = Integer.parseInt(id);
-        User user = getUser(authentication);
+        User user = userService.getUser(authentication);
         Note note = noteService.getNoteById(noteId);
         if (userOwnsNote(note, user)) {
             noteService.deleteNote(noteId);
@@ -65,11 +65,6 @@ public class NoteController {
         String noteTitle = newNote.getNotetitle();
         Integer userId = user.getUserid();
         return !(null == noteService.getNoteByName(noteTitle, userId));
-    }
-
-    private User getUser(Authentication authentication) {
-        String username = authentication.getName();
-        return userService.getUser(username);
     }
 
     private void setErrorMessage(Model model, String errorMessage) {
