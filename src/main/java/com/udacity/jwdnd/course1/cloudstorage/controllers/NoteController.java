@@ -1,7 +1,5 @@
 package com.udacity.jwdnd.course1.cloudstorage.controllers;
 
-import com.udacity.jwdnd.course1.cloudstorage.mappers.NoteMapper;
-import com.udacity.jwdnd.course1.cloudstorage.mappers.UserMapper;
 import com.udacity.jwdnd.course1.cloudstorage.model.Note;
 import com.udacity.jwdnd.course1.cloudstorage.model.User;
 import com.udacity.jwdnd.course1.cloudstorage.services.NoteService;
@@ -36,8 +34,10 @@ public class NoteController {
                 setErrorMessage(model, "You already have a note with the title \"" + newNote.getNotetitle() + "\"");
             }
         } else {
-            // TODO: Check that the user owns the note
-            noteService.updateNote(newNote);
+            Note oldNote = noteService.getNoteById(newNote.getNoteid());
+            if (userOwnsNote(oldNote, user)) {
+                noteService.updateNote(newNote);
+            }
         }
 
         return "result";
