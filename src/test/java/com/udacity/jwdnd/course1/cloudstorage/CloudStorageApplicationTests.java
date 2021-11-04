@@ -1,5 +1,6 @@
 package com.udacity.jwdnd.course1.cloudstorage;
 
+import com.udacity.jwdnd.course1.cloudstorage.model.Credential;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.junit.jupiter.api.*;
 import org.openqa.selenium.WebDriver;
@@ -8,8 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.test.context.jdbc.Sql;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -20,6 +20,9 @@ class CloudStorageApplicationTests {
     private static final String LOGOUT_MESSAGE = "You have been logged out";
     public static final String DEFAULT_NOTE_TITLE = "My new note title";
     public static final String DEFAULT_NOTE_DESCRIPTION = "My new note description";
+    public static final String DEFAULT_CREDENTIAL_URL = "https://www.example.com";
+    public static final String DEFAULT_CREDENTIAL_USERNAME = "admin";
+    public static final String DEFAULT_CREDENTIAL_PASSWORD = "password";
 
     @LocalServerPort
     private int port;
@@ -47,13 +50,13 @@ class CloudStorageApplicationTests {
     @Test
     public void getLoginPage() {
         driver.get(serverURL + this.port + "/login");
-        Assertions.assertEquals("Login", driver.getTitle());
+        assertEquals("Login", driver.getTitle());
     }
 
     @Test
     public void getSignUpPage() {
         driver.get(serverURL + this.port + "/signup");
-        Assertions.assertEquals("Sign Up", driver.getTitle());
+        assertEquals("Sign Up", driver.getTitle());
     }
 
     @Test
@@ -61,7 +64,7 @@ class CloudStorageApplicationTests {
         driver.get(serverURL + this.port + "/signup");
         SignUpPage signUpPage = new SignUpPage(driver);
         signUpPage.goToLoginPage();
-        Assertions.assertEquals("Login", driver.getTitle());
+        assertEquals("Login", driver.getTitle());
     }
 
     @Test
@@ -69,20 +72,20 @@ class CloudStorageApplicationTests {
         driver.get(serverURL + this.port + "/login");
         LoginPage loginPage = new LoginPage(driver);
         loginPage.goToSignUp();
-        Assertions.assertEquals("Sign Up", driver.getTitle());
+        assertEquals("Sign Up", driver.getTitle());
     }
 
     @Test
     public void goingToHomePageUnauthenticatedRedirectsToLoginPage() {
         driver.get(serverURL + this.port + "/home");
-        Assertions.assertEquals("Login", driver.getTitle());
+        assertEquals("Login", driver.getTitle());
     }
 
     @Test
     public void logInInvalidUser() {
         driver.get(serverURL + this.port + "/login");
         LoginPage loginPage = new LoginPage(driver);
-        Assertions.assertEquals("Invalid username or password", loginPage.loginInvalidUser("username", "password").getErrorMessage());
+        assertEquals("Invalid username or password", loginPage.loginInvalidUser("username", DEFAULT_CREDENTIAL_PASSWORD).getErrorMessage());
     }
 
     @Test
@@ -90,7 +93,7 @@ class CloudStorageApplicationTests {
         driver.get(serverURL + this.port + "/login");
         LoginPage loginPage = new LoginPage(driver);
         loginPage.loginValidUser("testUser", "testPassword");
-        Assertions.assertEquals("Home", driver.getTitle());
+        assertEquals("Home", driver.getTitle());
     }
 
     @Test
@@ -98,7 +101,7 @@ class CloudStorageApplicationTests {
         driver.get(serverURL + this.port + "/signup");
         SignUpPage signUpPage = new SignUpPage(driver);
         String errorMessage = signUpPage.registerNewUser("John", "Doe", "testUser", "testPassword").getErrorMessage();
-        Assertions.assertEquals(SIGNUP_ERROR_USER_ALREADY_EXISTS, errorMessage);
+        assertEquals(SIGNUP_ERROR_USER_ALREADY_EXISTS, errorMessage);
     }
 
     @Test
@@ -106,7 +109,7 @@ class CloudStorageApplicationTests {
         driver.get(serverURL + this.port + "/signup");
         SignUpPage signUpPage = new SignUpPage(driver);
         String successMessage = signUpPage.registerNewUser("Jane", "Smith", "jane_smith", "newPassword").getSuccessMessage();
-        Assertions.assertEquals(SIGNUP_SUCCESS, successMessage);
+        assertEquals(SIGNUP_SUCCESS, successMessage);
     }
 
     @Test
@@ -116,7 +119,7 @@ class CloudStorageApplicationTests {
         driver.get(serverURL + this.port + "/signup");
         SignUpPage signUpPage = new SignUpPage(driver);
         signUpPage.registerNewUser("Guenther", "Frager", username, password).goToLoginPageAfterSuccess();
-        Assertions.assertEquals("Login", driver.getTitle());
+        assertEquals("Login", driver.getTitle());
     }
 
     @Test
@@ -128,7 +131,7 @@ class CloudStorageApplicationTests {
         SignUpPage afterSignup = signUpPage.registerNewUser("Kermit", "The Frog", username, password);
         LoginPage loginPage = afterSignup.goToLoginPageAfterSuccess();
         loginPage.loginValidUser(username, password);
-        Assertions.assertEquals("Home", driver.getTitle());
+        assertEquals("Home", driver.getTitle());
     }
 
     @Test
@@ -139,7 +142,7 @@ class CloudStorageApplicationTests {
         LoginPage start = new LoginPage(driver);
         SignUpPage signUpPage = start.goToSignUp();
         String successMessage = signUpPage.registerNewUser("Filemon", "Pi", username, password).getSuccessMessage();
-        Assertions.assertEquals(SIGNUP_SUCCESS, successMessage);
+        assertEquals(SIGNUP_SUCCESS, successMessage);
 
     }
 
@@ -152,7 +155,7 @@ class CloudStorageApplicationTests {
         SignUpPage signUpPage = start.goToSignUp();
         LoginPage loginPage = signUpPage.registerNewUser("Juan", "Lopez", username, password).goToLoginPageAfterSuccess();
         loginPage.loginValidUser(username, password);
-        Assertions.assertEquals("Home", driver.getTitle());
+        assertEquals("Home", driver.getTitle());
     }
 
     @Test
@@ -161,7 +164,7 @@ class CloudStorageApplicationTests {
         LoginPage loginPage = new LoginPage(driver);
         HomePage homePage = loginPage.loginValidUser("testUser", "testPassword");
         String logoutMessage = homePage.logout().getLogoutMessage();
-        Assertions.assertEquals(LOGOUT_MESSAGE, logoutMessage);
+        assertEquals(LOGOUT_MESSAGE, logoutMessage);
     }
 
     @Test
@@ -171,7 +174,7 @@ class CloudStorageApplicationTests {
         HomePage homePage = loginPage.loginValidUser("testUser", "testPassword");
         homePage.logout();
         driver.get(serverURL + this.port + "/home");
-        Assertions.assertEquals("Login", driver.getTitle());
+        assertEquals("Login", driver.getTitle());
     }
 
     @Test
@@ -184,7 +187,7 @@ class CloudStorageApplicationTests {
         LoginPage loginPage = afterSignup.goToLoginPageAfterSuccess();
         HomePage homePage = loginPage.loginValidUser(username, password);
         String logoutMessage = homePage.logout().getLogoutMessage();
-        Assertions.assertEquals(LOGOUT_MESSAGE, logoutMessage);
+        assertEquals(LOGOUT_MESSAGE, logoutMessage);
     }
 
     @Sql(statements = "DELETE FROM NOTES;", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
@@ -239,6 +242,61 @@ class CloudStorageApplicationTests {
         assertFalse(homePage.noteExists(DEFAULT_NOTE_TITLE, DEFAULT_NOTE_DESCRIPTION));
     }
 
+    @Sql(statements = "DELETE FROM CREDENTIALS;", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    @Test
+    public void createCredential() {
+        HomePage homePage = loginDefaultUser();
+        homePage.openCredentialsTab();
+        Credential credential = new Credential();
+        credential.setUrl(DEFAULT_CREDENTIAL_URL);
+        credential.setUsername(DEFAULT_CREDENTIAL_USERNAME);
+        credential.setPassword(DEFAULT_CREDENTIAL_PASSWORD);
+        ResultPage resultPage = homePage.createCredential(credential);
+        assertTrue(resultPage.isSuccess());
+        homePage = resultPage.goToHomePage();
+        homePage.openCredentialsTab();
+        assertTrue(homePage.credentialExists(credential));
+        assertEquals(DEFAULT_CREDENTIAL_PASSWORD, homePage.getPlainTextPassword(credential));
+    }
+
+    @Sql(statements = "DELETE FROM CREDENTIALS;", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    @Test
+    public void updateCredential() {
+        Credential defaultCredential = new Credential();
+        defaultCredential.setUrl(DEFAULT_CREDENTIAL_URL);
+        defaultCredential.setUsername(DEFAULT_CREDENTIAL_USERNAME);
+        defaultCredential.setPassword(DEFAULT_CREDENTIAL_PASSWORD);
+        Credential updatedCredential = new Credential();
+        updatedCredential.setUrl("https://www.test.com");
+        updatedCredential.setUsername("administrator");
+        updatedCredential.setPassword("different-password");
+        HomePage homePage = createDefaultCredential();
+        homePage.openCredentialsTab();
+        ResultPage resultPage = homePage.updateCredential(defaultCredential, updatedCredential);
+        assertTrue(resultPage.isSuccess());
+        homePage = resultPage.goToHomePage();
+        homePage.openCredentialsTab();
+        assertFalse(homePage.credentialExists(defaultCredential));
+        assertTrue(homePage.credentialExists(updatedCredential));
+        assertNotEquals(DEFAULT_CREDENTIAL_PASSWORD, homePage.getPlainTextPassword(updatedCredential));
+        assertEquals("different-password", homePage.getPlainTextPassword(updatedCredential));
+    }
+
+    @Test
+    public void deleteCredential() {
+        Credential credential = new Credential();
+        credential.setUrl(DEFAULT_CREDENTIAL_URL);
+        credential.setUsername(DEFAULT_CREDENTIAL_USERNAME);
+        credential.setPassword(DEFAULT_CREDENTIAL_PASSWORD);
+        HomePage homePage = createDefaultCredential();
+        homePage.openCredentialsTab();
+        ResultPage resultPage = homePage.deleteCredential(credential);
+        assertTrue(resultPage.isSuccess());
+        homePage = resultPage.goToHomePage();
+        homePage.openCredentialsTab();
+        assertFalse(homePage.credentialExists(credential));
+    }
+
     private HomePage createDefaultNote() {
         HomePage homePage = loginDefaultUser();
         homePage.openNotesTab();
@@ -248,10 +306,22 @@ class CloudStorageApplicationTests {
         return resultPage.goToHomePage();
     }
 
+    private HomePage createDefaultCredential() {
+        HomePage homePage = loginDefaultUser();
+        homePage.openCredentialsTab();
+        Credential credential = new Credential();
+        credential.setUrl(DEFAULT_CREDENTIAL_URL);
+        credential.setUsername(DEFAULT_CREDENTIAL_USERNAME);
+        credential.setPassword(DEFAULT_CREDENTIAL_PASSWORD);
+        ResultPage resultPage = homePage.createCredential(credential);
+        return resultPage.goToHomePage();
+    }
+
     private HomePage loginDefaultUser() {
         driver.get(serverURL + this.port + "/login");
         LoginPage loginPage = new LoginPage(driver);
         return loginPage.loginValidUser("testUser", "testPassword");
     }
+
 
 }
