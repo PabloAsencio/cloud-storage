@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class CloudStorageApplicationTests {
 
     private static final String SIGNUP_ERROR_USER_ALREADY_EXISTS = "The username already exists";
-    private static final String SIGNUP_SUCCESS = "You successfully signed up! Please continue to the login page.";
+    private static final String SIGNUP_SUCCESS = "You successfully signed up!";
     private static final String LOGOUT_MESSAGE = "You have been logged out";
     public static final String DEFAULT_NOTE_TITLE = "My new note title";
     public static final String DEFAULT_NOTE_DESCRIPTION = "My new note description";
@@ -100,7 +100,7 @@ class CloudStorageApplicationTests {
     public void signUpExistingUser() {
         driver.get(serverURL + this.port + "/signup");
         SignUpPage signUpPage = new SignUpPage(driver);
-        String errorMessage = signUpPage.registerNewUser("John", "Doe", "testUser", "testPassword").getErrorMessage();
+        String errorMessage = signUpPage.registerInvalidUser("John", "Doe", "testUser", "testPassword").getErrorMessage();
         assertEquals(SIGNUP_ERROR_USER_ALREADY_EXISTS, errorMessage);
     }
 
@@ -108,19 +108,10 @@ class CloudStorageApplicationTests {
     public void signUpNewValidUser() {
         driver.get(serverURL + this.port + "/signup");
         SignUpPage signUpPage = new SignUpPage(driver);
-        String successMessage = signUpPage.registerNewUser("Jane", "Smith", "jane_smith", "newPassword").getSuccessMessage();
+        String successMessage = signUpPage.registerValidUser("Jane", "Smith", "jane_smith", "newPassword").getSuccessMessage();
         assertEquals(SIGNUP_SUCCESS, successMessage);
     }
 
-    @Test
-    public void signUpNewValidUserAndGoToLoginPage() {
-        String username = "original";
-        String password = "yetAnotherPassword";
-        driver.get(serverURL + this.port + "/signup");
-        SignUpPage signUpPage = new SignUpPage(driver);
-        signUpPage.registerNewUser("Guenther", "Frager", username, password).goToLoginPageAfterSuccess();
-        assertEquals("Login", driver.getTitle());
-    }
 
     @Test
     public void signUpNewValidUserAndLogin() {
@@ -128,8 +119,7 @@ class CloudStorageApplicationTests {
         String password = "soManyPasswords";
         driver.get(serverURL + this.port + "/signup");
         SignUpPage signUpPage = new SignUpPage(driver);
-        SignUpPage afterSignup = signUpPage.registerNewUser("Kermit", "The Frog", username, password);
-        LoginPage loginPage = afterSignup.goToLoginPageAfterSuccess();
+        LoginPage loginPage = signUpPage.registerValidUser("Kermit", "The Frog", username, password);
         loginPage.loginValidUser(username, password);
         assertEquals("Home", driver.getTitle());
     }
@@ -141,7 +131,7 @@ class CloudStorageApplicationTests {
         driver.get(serverURL + this.port + "/login");
         LoginPage start = new LoginPage(driver);
         SignUpPage signUpPage = start.goToSignUp();
-        String successMessage = signUpPage.registerNewUser("Filemon", "Pi", username, password).getSuccessMessage();
+        String successMessage = signUpPage.registerValidUser("Filemon", "Pi", username, password).getSuccessMessage();
         assertEquals(SIGNUP_SUCCESS, successMessage);
 
     }
@@ -153,7 +143,7 @@ class CloudStorageApplicationTests {
         driver.get(serverURL + this.port + "/login");
         LoginPage start = new LoginPage(driver);
         SignUpPage signUpPage = start.goToSignUp();
-        LoginPage loginPage = signUpPage.registerNewUser("Juan", "Lopez", username, password).goToLoginPageAfterSuccess();
+        LoginPage loginPage = signUpPage.registerValidUser("Juan", "Lopez", username, password);
         loginPage.loginValidUser(username, password);
         assertEquals("Home", driver.getTitle());
     }
@@ -183,8 +173,7 @@ class CloudStorageApplicationTests {
         String password = "anotherPassword";
         driver.get(serverURL + this.port + "/signup");
         SignUpPage signUpPage = new SignUpPage(driver);
-        SignUpPage afterSignup = signUpPage.registerNewUser("Johann Sebastian", "Mastropiero", username, password);
-        LoginPage loginPage = afterSignup.goToLoginPageAfterSuccess();
+        LoginPage loginPage = signUpPage.registerValidUser("Johann Sebastian", "Mastropiero", username, password);
         HomePage homePage = loginPage.loginValidUser(username, password);
         String logoutMessage = homePage.logout().getLogoutMessage();
         assertEquals(LOGOUT_MESSAGE, logoutMessage);

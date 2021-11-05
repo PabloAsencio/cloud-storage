@@ -30,6 +30,9 @@ public class LoginPage {
     @FindBy(id = "message-error")
     private WebElement errorMessage;
 
+    @FindBy(id = "message-success")
+    private WebElement successMessage;
+
     @FindBy(id = "message-logout")
     private WebElement logoutMessage;
 
@@ -117,6 +120,14 @@ public class LoginPage {
      */
     public String getErrorMessage() {
         return errorMessage.getText();
+    }
+
+    /**
+     * Tries to get the signup success message and returns it
+     * @return a signup success message.
+     * */
+    public String getSuccessMessage() {
+        return successMessage.getText();
     }
 
     /**

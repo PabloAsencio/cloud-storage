@@ -51,7 +51,7 @@
                                 <tbody>
                                 <tr th:each="file : ${files}">
                                     <td>
-                                        <a target="_blank" class="btn btn-success" th:href="@{/download-file/{id}(id = ${file.fileId})}">View</a>
+                                        <a download class="btn btn-success" th:href="@{/download-file/{id}(id = ${file.fileId})}">View</a>
                                         <!-- We need to use a form to wrap the Delete button because otherwise we would not be able to use
                                              the HTTP POST method. Using GET would be inappropriate for a delete operation, since a GET
                                              request is supposed to be idempotent. -->

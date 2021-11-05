@@ -33,9 +33,6 @@ public class SignUpPage {
     @CacheLookup
     private WebElement submitButton;
 
-    @FindBy(id = "message-success")
-    private WebElement successMessage;
-
     @FindBy(id = "message-error")
     private WebElement errorMessage;
 
@@ -60,21 +57,15 @@ public class SignUpPage {
         PageFactory.initElements(driver, this);
     }
 
-    /**
-     * Tries to register a new user
-     * @param firstName
-     * @param lastName
-     * @param username
-     * @param password
-     * @return a new SignUpPage where the results of the registering process are shown
-     */
-    public SignUpPage registerNewUser(final String firstName, final String lastName, final String username, final String password) {
-        setFirstName(firstName);
-        setLastName(lastName);
-        setUsername(username);
-        setPassword(password);
-        submitForm();
-        return  new SignUpPage(driver);
+
+    public SignUpPage registerInvalidUser(final String firstName, final String lastName, final String username, final String password) {
+        registerNewUser(firstName, lastName, username, password);
+        return new SignUpPage(driver);
+    }
+
+    public LoginPage registerValidUser(final String firstName, final String lastName, final String username, final String password) {
+        registerNewUser(firstName, lastName, username, password);
+        return new LoginPage(driver);
     }
 
     /**
@@ -125,28 +116,6 @@ public class SignUpPage {
         return new LoginPage(driver);
     }
 
-    /**
-     * Tries to click on the link to the login page after having
-     * successfully signed up a new user
-     * @return a new LoginPage
-     */
-    public LoginPage goToLoginPageAfterSuccess() {
-        // For some reason clicking the successLoginLink directly with successLoginLink.click() will not work
-        // although the link is enabled at the time this method is reached. This seems to be a problem with
-        // ChromeDriver when the driver is reused (see https://github.com/SeleniumHQ/selenium/issues/4075#issuecomment-456297277).
-        // Simulating the click with a javascript script seems to circumvent this issue.
-        executor.executeScript("arguments[0].click();", successLoginLink);
-        return new LoginPage(driver);
-    }
-
-    /**
-     * Tries to get the success message and returns it
-     * @return a success message
-     */
-    public String getSuccessMessage() {
-        wait.until(ExpectedConditions.elementToBeClickable(successMessage));
-        return successMessage.getText();
-    }
 
     /**
      * Tries to get the error message and returns it
@@ -156,4 +125,11 @@ public class SignUpPage {
         return errorMessage.getText();
     }
 
+    private void registerNewUser(final String firstName, final String lastName, final String username, final String password) {
+        setFirstName(firstName);
+        setLastName(lastName);
+        setUsername(username);
+        setPassword(password);
+        submitForm();
+    }
 }

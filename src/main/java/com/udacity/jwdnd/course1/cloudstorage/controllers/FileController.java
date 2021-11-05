@@ -20,6 +20,8 @@ import java.io.OutputStream;
 @Controller
 public class FileController {
 
+    public static final int MAX_FILE_SIZE = 10485760;
+    public static final int BYTES_IN_A_MB = (1024 * 1024);
     private UserService userService;
     private FileService fileService;
 
@@ -31,7 +33,9 @@ public class FileController {
     @PostMapping("/upload-file")
     public String handleFileUpload(@RequestParam("fileUpload") MultipartFile fileUpload, Authentication authentication, Model model) {
         User user = userService.getUser(authentication);
-        if (!userHasFileWithSameName(fileUpload, user)) {
+        if (fileUpload.getSize() > MAX_FILE_SIZE) {
+            setErrorMessage(model, "Your file is too large. The maximum file size is " + MAX_FILE_SIZE / BYTES_IN_A_MB + "MB.");
+        } else if (!userHasFileWithSameName(fileUpload, user)) {
             try {
                 UploadedFile file = createFile(fileUpload, user);
                 saveFile(file, model);
