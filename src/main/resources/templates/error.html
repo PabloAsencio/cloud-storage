@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html>
+    <body class="p-3 mb-2 bg-light text-black">
+     <div class="container justify-content-center w-50 p-3">
+         <h1 class="display-5">Something went wrong!</h1>
+         <h2 th:if="${hasStatusCode}"><span th:text="${statusCode}">Code</span> <span th:text="${statusPhrase}">Reason</span></h2>
+         <h3 th:if="${hasStatusCode && statusCode >= 500}">Our Engineers are on it</h3>
+         <a th:href="@{/home}">Go Home</a>
+     </div>
+    </body>
+</html>
